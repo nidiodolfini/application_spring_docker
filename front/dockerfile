@@ -1,11 +1,12 @@
-FROM node:alpine
-
+FROM node:alpine as build-stage
 WORKDIR /usr/app
-
-COPY . /usr/app/
-
+COPY ./ /usr/app
 RUN npm install
 
-EXPOSE 3000
+RUN npm run build
 
-CMD ["npm", "start" ]
+FROM nginx:1.16.0-alpine
+
+COPY --from=build-stage /usr/app/dist/ /usr/share/nginx/html
+
+CMD ["nginx", "-g", "daemon off;"]
